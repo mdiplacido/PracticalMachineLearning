@@ -1,9 +1,9 @@
 ---
-title       : Motivation and pre-requisites
+title       : Practical Machine Learning Course Project
 subtitle    : 
-author      : Jeffrey Leek
-job         : Johns Hopkins Bloomberg School of Public Health
-logo        : bloomberg_shield.png
+author      : Marco DiPlacido
+job         : 
+logo        : 
 framework   : io2012        # {io2012, html5slides, shower, dzslides, ...}
 highlighter : highlight.js  # {highlight.js, prettify, highlight}
 hitheme     : tomorrow   # 
@@ -32,105 +32,84 @@ knit_hooks$set(plot = knitr:::hook_plot_html)
 ```
 
 
-## About this course
+## About My Course Project
 
-* This course covers the basic ideas behind machine learning/prediction
-  * Study design - training vs. test sets
-  * Conceptual issues - out of sample error, ROC curves
-  * Practical implementation - the caret package
-* What this course depends on
-  * The Data Scientist's Toolbox
-  * R Programming
-* What would be useful
-  * Exploratory analysis
-  * Reporting Data and Reproducible Research
-  * Regression models
+* Summary
+* In Sample and Out of Sample error
+* The code
+* Conclusion
 
 ---
 
-## Who predicts?
+## Summary
 
-* Local governments -> pension payments
-* Google -> whether you will click on an ad
-* Amazon -> what movies you will watch
-* Insurance companies -> what your risk of death is
-* Johns Hopkins -> who will succeed in their programs
+It was imediatly clear to me that this was a classification problem.  We have a factor variable that we are trying to predict, in this case it is classe.  There were around 159 possible variables i could use as predictors, and i soon realized that a lot of them were missing values in our training data set.  To widdle down to my candidate predictors, I started by using a very simple approach where i would remove all columns as candidates that had 95% or more NA values.  I checked both the test data set and the quiz data set for columns that met this criteria.  At this point i was able to get the number of predictors in the 50's, i further cleaned the datasets by removing other columns like X, user_name, and other such columns that didn't make sense as predictors. 
 
----
+I felt that if i could reduce the number of predictors down to the mimimal set that could capture the most information that that would be a good logical next step.  I used PCA from the caret package and that was able to create a new set of 26 predictors.   
 
-
-## Why predict? Glory!
-
-<img class=center src=../../assets/img/08_PredictionAndMachineLearning/volinsky.png height=450>
-
-
-[http://www.zimbio.com/photos/Chris+Volinsky](http://www.zimbio.com/photos/Chris+Volinsky)
-
-
+Finally i needed to select a model to train my model on, the professor mentioned that Random Forests are very popular in classification problems - you often see their use in Kaggle competitions.  I decided to use the randomForeset package to build my model from these new set of features. 
 
 ---
 
-## Why predict? Riches!
+## In Sample and Out of Sample error
 
-<img class=center src=../../assets/img/08_PredictionAndMachineLearning/heritage.png height=450>
+The model was able to predict in-sample with 100% accuracy.  This was not of great intrest to me because i was more concerned about how this model would generalize on my held out 30% test set, seeing 100% accuracy there would be of concern to me, because it might be an indication of over-fitting.   However the results looked good and the confusionMatrix on that set showed that the model was not perfectly fitting that data, but mostly getting the classifications right with an accuracy of 97.5%.  At this point i was ready to try out my model on the Quiz set.
 
+#### Accuracy in-sample
 
-[http://www.heritagehealthprize.com/c/hhp](http://www.heritagehealthprize.com/c/hhp)
-
-
-
----
-
-## Why predict? For sport!
-
-<img class=center src=../../assets/img/08_PredictionAndMachineLearning/kaggle.png height=350>
-
-
-[http://www.kaggle.com/](http://www.kaggle.com/)
-
----
-
-## Why predict? To save lives!
-
-<img class=center src=../../assets/img/08_PredictionAndMachineLearning/oncotype.png height=350>
-
-[http://www.oncotypedx.com/en-US/Home](http://www.oncotypedx.com/en-US/Home)
-
----
-
-## A useful (if a bit advanced) book
-
-<img class=center src=../../assets/img/08_PredictionAndMachineLearning/elemlearn.png height=350>
+Confusion Matrix and Statistics
+   
+          | A  |  B  |  C |   D  |  E
+      --- | --- | --- | --- | --- | ---
+     A | 3906 |  0    |  0   |  0  | 0
+     B |  0  | 2658  |  0  |  0  |   0
+     C |   0  |  0   | 2396  |  0  |  0
+     D |   0  |  0    | 0   | 2252 |   0
+     E |   0  |  0    |  0   | 0   | 2525
 
 
-[The elements of statistical learning](http://statweb.stanford.edu/~tibs/ElemStatLearn/)
+###### Overall Statistics
+                                     
+                  Accuracy : 1          
+                    95% CI : (0.9997, 1)
+       No Information Rate : 0.2843     
+       P-Value [Acc > NIR] : < 2.2e-16  
+                                     
+                     Kappa : 1          
+    Mcnemar's Test P-Value : NA       
 
----
+#### Accuracy out-sample
 
-## A useful package
+Confusion Matrix and Statistics
+   
+          | A  |  B  |  C |   D  |  E
+      --- | --- | --- | --- | --- | ---
+     A | 1659 |  7    |  1   |  6  | 1
+     B |  21  | 1103  |  14  |  1  |   0
+     C |   1  |  27   | 987  |  8  |  3
+     D |   0  |  7    | 27   | 929 |   1
+     E |   0  |  7    |  8   | 5   | 1062
 
-<img class=center src=../../assets/img/08_PredictionAndMachineLearning/caret.png height=350>
-
-
-[http://caret.r-forge.r-project.org/](http://caret.r-forge.r-project.org/)
-
-
----
-
-## Machine learning (more advanced material)
-
-<img class=center src=../../assets/img/08_PredictionAndMachineLearning/machinelearning.png height=350>
-
-
-[https://www.coursera.org/course/ml](https://www.coursera.org/course/ml)
-
+###### Overall Statistics
+                                          
+               Accuracy : 0.9754          
+                 95% CI : (0.9711, 0.9792)
+    No Information Rate : 0.2856          
+    P-Value [Acc > NIR] : < 2.2e-16       
+                                          
+                  Kappa : 0.9688          
+ Mcnemar's Test P-Value : 2.29e-06  
 
 ---
 
-## Even more resources
+## The code
 
-* [List of machine learning resources on Quora](http://www.quora.com/Machine-Learning/What-are-some-good-resources-for-learning-about-machine-learning-Why)
-* [List of machine learning resources from Science](http://www.sciencemag.org/site/feature/data/compsci/machine_learning.xhtml)
-* [Advanced notes from MIT open courseware](http://ocw.mit.edu/courses/electrical-engineering-and-computer-science/6-867-machine-learning-fall-2006/lecture-notes/)
-* [Advanced notes from CMU](http://www.stat.cmu.edu/~cshalizi/350/)
-* [Kaggle - machine learning competitions](http://www.kaggle.com/)
+[The Code](./CourseProject.R)
+
+---
+
+## Conclusion
+
+On the quiz set my model got 20/20 correct.  Looking back on my work i probably wouldn't have jumped right to PCA, it's possible that that was not necessary to produce a decent model, but I haven't gone back to verify that PCA really improved the accuracy of my model.  The work to clean the data and reduce my set of possible predictors down was where most of the time was spent in building this model, i didn't bother with centering and scaling my predictors (it's possible that PCA does that for me).
+
+---

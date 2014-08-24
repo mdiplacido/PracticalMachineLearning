@@ -5,7 +5,7 @@
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
 <meta http-equiv="x-ua-compatible" content="IE=9" >
 
-<title>About this course</title>
+<title>About My Course Project</title>
 
 <style type="text/css">
 body, td {
@@ -142,110 +142,179 @@ hr {
 </head>
 
 <body>
-<h2>About this course</h2>
+<h2>About My Course Project</h2>
 
 <ul>
-<li>This course covers the basic ideas behind machine learning/prediction
-
-<ul>
-<li>Study design - training vs. test sets</li>
-<li>Conceptual issues - out of sample error, ROC curves</li>
-<li>Practical implementation - the caret package</li>
-</ul></li>
-<li>What this course depends on
-
-<ul>
-<li>The Data Scientist&#39;s Toolbox</li>
-<li>R Programming</li>
-</ul></li>
-<li>What would be useful
-
-<ul>
-<li>Exploratory analysis</li>
-<li>Reporting Data and Reproducible Research</li>
-<li>Regression models</li>
-</ul></li>
+<li>Summary</li>
+<li>In Sample and Out of Sample error</li>
+<li>The code</li>
+<li>Conclusion</li>
 </ul>
 
 <hr/>
 
-<h2>Who predicts?</h2>
+<h2>Summary</h2>
 
-<ul>
-<li>Local governments -&gt; pension payments</li>
-<li>Google -&gt; whether you will click on an ad</li>
-<li>Amazon -&gt; what movies you will watch</li>
-<li>Insurance companies -&gt; what your risk of death is</li>
-<li>Johns Hopkins -&gt; who will succeed in their programs</li>
-</ul>
+<p>It was imediatly clear to me that this was a classification problem.  We have a factor variable that we are trying to predict, in this case it is classe.  There were around 159 possible variables i could use as predictors, and i soon realized that a lot of them were missing values in our training data set.  To widdle down to my candidate predictors, I started by using a very simple approach where i would remove all columns as candidates that had 95% or more NA values.  I checked both the test data set and the quiz data set for columns that met this criteria.  At this point i was able to get the number of predictors in the 50&#39;s, i further cleaned the datasets by removing other columns like X, user_name, and other such columns that didn&#39;t make sense as predictors. </p>
+
+<p>I felt that if i could reduce the number of predictors down to the mimimal set that could capture the most information that that would be a good logical next step.  I used PCA from the caret package and that was able to create a new set of 26 predictors.   </p>
+
+<p>Finally i needed to select a model to train my model on, the professor mentioned that Random Forests are very popular in classification problems - you often see their use in Kaggle competitions.  I decided to use the randomForeset package to build my model from these new set of features. </p>
 
 <hr/>
 
-<h2>Why predict? Glory!</h2>
+<h2>In Sample and Out of Sample error</h2>
 
-<p><img class=center src=../../assets/img/08_PredictionAndMachineLearning/volinsky.png height=450></p>
+<p>The model was able to predict in-sample with 100% accuracy.  This was not of great intrest to me because i was more concerned about how this model would generalize on my held out 30% test set, seeing 100% accuracy there would be of concern to me, because it might be an indication of over-fitting.   However the results looked good and the confusionMatrix on that set showed that the model was not perfectly fitting that data, but mostly getting the classifications right with an accuracy of 97.5%.  At this point i was ready to try out my model on the Quiz set.</p>
 
-<p><a href="http://www.zimbio.com/photos/Chris+Volinsky">http://www.zimbio.com/photos/Chris+Volinsky</a></p>
+<h4>Accuracy in-sample</h4>
+
+<p>Confusion Matrix and Statistics</p>
+
+<table><thead>
+<tr>
+<th></th>
+<th>A</th>
+<th>B</th>
+<th>C</th>
+<th>D</th>
+<th>E</th>
+</tr>
+</thead><tbody>
+<tr>
+<td>A</td>
+<td>3906</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+</tr>
+<tr>
+<td>B</td>
+<td>0</td>
+<td>2658</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+</tr>
+<tr>
+<td>C</td>
+<td>0</td>
+<td>0</td>
+<td>2396</td>
+<td>0</td>
+<td>0</td>
+</tr>
+<tr>
+<td>D</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+<td>2252</td>
+<td>0</td>
+</tr>
+<tr>
+<td>E</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+<td>2525</td>
+</tr>
+</tbody></table>
+
+<h6>Overall Statistics</h6>
+
+<pre><code>              Accuracy : 1          
+                95% CI : (0.9997, 1)
+   No Information Rate : 0.2843     
+   P-Value [Acc &gt; NIR] : &lt; 2.2e-16  
+
+                 Kappa : 1          
+Mcnemar&#39;s Test P-Value : NA       
+</code></pre>
+
+<h4>Accuracy out-sample</h4>
+
+<p>Confusion Matrix and Statistics</p>
+
+<table><thead>
+<tr>
+<th></th>
+<th>A</th>
+<th>B</th>
+<th>C</th>
+<th>D</th>
+<th>E</th>
+</tr>
+</thead><tbody>
+<tr>
+<td>A</td>
+<td>1659</td>
+<td>7</td>
+<td>1</td>
+<td>6</td>
+<td>1</td>
+</tr>
+<tr>
+<td>B</td>
+<td>21</td>
+<td>1103</td>
+<td>14</td>
+<td>1</td>
+<td>0</td>
+</tr>
+<tr>
+<td>C</td>
+<td>1</td>
+<td>27</td>
+<td>987</td>
+<td>8</td>
+<td>3</td>
+</tr>
+<tr>
+<td>D</td>
+<td>0</td>
+<td>7</td>
+<td>27</td>
+<td>929</td>
+<td>1</td>
+</tr>
+<tr>
+<td>E</td>
+<td>0</td>
+<td>7</td>
+<td>8</td>
+<td>5</td>
+<td>1062</td>
+</tr>
+</tbody></table>
+
+<h6>Overall Statistics</h6>
+
+<pre><code>           Accuracy : 0.9754          
+             95% CI : (0.9711, 0.9792)
+No Information Rate : 0.2856          
+P-Value [Acc &gt; NIR] : &lt; 2.2e-16       
+
+              Kappa : 0.9688          
+</code></pre>
+
+<p>Mcnemar&#39;s Test P-Value : 2.29e-06  </p>
 
 <hr/>
 
-<h2>Why predict? Riches!</h2>
+<h2>The code</h2>
 
-<p><img class=center src=../../assets/img/08_PredictionAndMachineLearning/heritage.png height=450></p>
-
-<p><a href="http://www.heritagehealthprize.com/c/hhp">http://www.heritagehealthprize.com/c/hhp</a></p>
+<p><a href="./CourseProject.R">The Code</a></p>
 
 <hr/>
 
-<h2>Why predict? For sport!</h2>
+<h2>Conclusion</h2>
 
-<p><img class=center src=../../assets/img/08_PredictionAndMachineLearning/kaggle.png height=350></p>
-
-<p><a href="http://www.kaggle.com/">http://www.kaggle.com/</a></p>
+<p>On the quiz set my model got 20/20 correct.  Looking back on my work i probably wouldn&#39;t have jumped right to PCA, it&#39;s possible that that was not necessary to produce a decent model, but I haven&#39;t gone back to verify that PCA really improved the accuracy of my model.  The work to clean the data and reduce my set of possible predictors down was where most of the time was spent in building this model, i didn&#39;t bother with centering and scaling my predictors (it&#39;s possible that PCA does that for me).</p>
 
 <hr/>
-
-<h2>Why predict? To save lives!</h2>
-
-<p><img class=center src=../../assets/img/08_PredictionAndMachineLearning/oncotype.png height=350></p>
-
-<p><a href="http://www.oncotypedx.com/en-US/Home">http://www.oncotypedx.com/en-US/Home</a></p>
-
-<hr/>
-
-<h2>A useful (if a bit advanced) book</h2>
-
-<p><img class=center src=../../assets/img/08_PredictionAndMachineLearning/elemlearn.png height=350></p>
-
-<p><a href="http://statweb.stanford.edu/%7Etibs/ElemStatLearn/">The elements of statistical learning</a></p>
-
-<hr/>
-
-<h2>A useful package</h2>
-
-<p><img class=center src=../../assets/img/08_PredictionAndMachineLearning/caret.png height=350></p>
-
-<p><a href="http://caret.r-forge.r-project.org/">http://caret.r-forge.r-project.org/</a></p>
-
-<hr/>
-
-<h2>Machine learning (more advanced material)</h2>
-
-<p><img class=center src=../../assets/img/08_PredictionAndMachineLearning/machinelearning.png height=350></p>
-
-<p><a href="https://www.coursera.org/course/ml">https://www.coursera.org/course/ml</a></p>
-
-<hr/>
-
-<h2>Even more resources</h2>
-
-<ul>
-<li><a href="http://www.quora.com/Machine-Learning/What-are-some-good-resources-for-learning-about-machine-learning-Why">List of machine learning resources on Quora</a></li>
-<li><a href="http://www.sciencemag.org/site/feature/data/compsci/machine_learning.xhtml">List of machine learning resources from Science</a></li>
-<li><a href="http://ocw.mit.edu/courses/electrical-engineering-and-computer-science/6-867-machine-learning-fall-2006/lecture-notes/">Advanced notes from MIT open courseware</a></li>
-<li><a href="http://www.stat.cmu.edu/%7Ecshalizi/350/">Advanced notes from CMU</a></li>
-<li><a href="http://www.kaggle.com/">Kaggle - machine learning competitions</a></li>
-</ul>
 
 </body>
 

@@ -189,7 +189,7 @@ testKnn <- predict(preProcKnnTest, testing[,-classeColIdx])
 # testPCA <- predict(preProcPCA, testKnn)
 testPCA <- predict(preProcPCA, testing[,-classeColIdx])
 
-# out of sample
+# out of sample error rate
 confusionMatrix(testing$classe, predict(modelFit,testPCA))
 
 # confusionMatrix(testing$classe, predict(modelFit,testing))
