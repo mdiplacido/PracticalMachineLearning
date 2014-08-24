@@ -1,5 +1,6 @@
 setwd("C:\\Users\\marcodi\\Documents\\Practical Machine Learning\\Course Project")
 
+# finds column names that do not meet a ratio of NA to !NA cutoff
 reportBadColumns <- function(df, threshold, verbose=F)
 {
   removeColumns <- c()
@@ -25,6 +26,7 @@ reportBadColumns <- function(df, threshold, verbose=F)
   invisible(removeColumns)
 }
 
+# finds all factor column names in a dataframe
 getAllFactorColumns <- function(df, exclude)
 {
   factors <- c()
@@ -40,6 +42,7 @@ getAllFactorColumns <- function(df, exclude)
   invisible(factors[! factors %in% exclude])
 }
 
+# converts a column in a data frame to numeric
 columnsAsNumeric <- function(df, columnNames)
 {
   allNames <- names(df)
@@ -61,6 +64,8 @@ columnsAsNumeric <- function(df, columnNames)
   invisible(df)
 }
 
+# mirrors columns, finds the interset of columns in two dataframes and returns the target dataframe
+# with just the intersection columns.  skipRemove can be used to indicate columns that should not be removed
 mirrorColumns <- function (dfSource, dfTarget, skipRemove)
 {
    targetNames <- names(dfTarget)
@@ -93,6 +98,7 @@ mirrorColumns <- function (dfSource, dfTarget, skipRemove)
    invisible(dfTarget)
 }
 
+# professor provided this, writes out each prediction to a file.
 pml_write_files = function(x){
   n = length(x)
   for(i in 1:n){
@@ -101,7 +107,7 @@ pml_write_files = function(x){
   }
 }
 
-
+# load the quiz/testing and train sets.
 quiz <- read.csv(file="./pml-testing.csv", header=TRUE)
 train <- read.csv('./pml-training.csv',header=TRUE)
 
@@ -118,6 +124,8 @@ train <- columnsAsNumeric(df=train, numericColumns)
 
 # step 1.  check to see which columns have more than 95% their values as NA.  
 # lets remove those columns from *all* the training data (we have not split yet)
+# we'll check both the quiz set and the training set.  makes no sense to build a model using predictors that 
+# are not present in the quiz/test set.
 badColumns <- reportBadColumns(df=train, threshold=.95)
 badQuizColumns <- reportBadColumns(df=quiz, threshold=.95)
 allBadColumns <- unique(c(badColumns, badQuizColumns))
@@ -142,57 +150,34 @@ trainBadRemoved <- trainBadRemoved[ , -which(names(trainBadRemoved) %in% remaini
 # get rid of some more columns
 trainBadRemoved <- trainBadRemoved[ , -which(names(trainBadRemoved) %in% c("X", "raw_timestamp_part_1", "raw_timestamp_part_2", "num_window"))]
 
+# create a random partition where 70% of the data is allocated to our training and 30% is allocated to our testing set.
 inTrain <- createDataPartition(y=trainBadRemoved$classe, p=.7, list=F)
 
 training <- trainBadRemoved[inTrain, ]
 testing <- trainBadRemoved[-inTrain, ]
 
 ##############################################################
-# try out random forest see how we do with one held out set
+# Random Forest training 
 
 # currently at the last col position
 classeColIdx <- ncol(training)
 classeColIdx
 
-# preprocessing step 1 impute the missing values, this also appears to center and scale the variables
-# preProcKnn <- preProcess(training[,-classeColIdx], method="knnImpute")
-# trainKnn <- predict(preProcKnn, training[,-classeColIdx])
-
-# preProcPCA <- preProcess(trainKnn, method="pca")
 preProcPCA <- preProcess(training[,-classeColIdx], method="pca")
 trainPCA <- predict(preProcPCA, training[,-classeColIdx])
 
-# now we train a random forest using the 36 components to predict the class
+# now we train a random forest using the 26 components to predict the class
 modelFit <- randomForest(training$classe ~ ., data=trainPCA)
 
 # in sample error rate
 confusionMatrix(training$classe, predict(modelFit,trainPCA))
 
-# modelFit <- randomForest(training$classe ~ ., data=training)
-# modelFit <- train(classe ~ ., method="rpart", data=training)
-
-# theTree <- getTree(modelFit$finalModel)
-# install.packages("rattle")
-# install.packages("rpart.plot")
-# library(rattle)
-# fancyRpartPlot(modelFit)
-
 # now we predict classe on the TEST set using a model (from the Training set) that has a reduced
 # feature set via PCA (see above)
-
-# preprocessing step 1 impute the missing values for test set, this also appears to center and scale the variables
-# note: not sure if these need to be centered and scaled against the training set...
-preProcKnnTest <- preProcess(testing[,-classeColIdx], method="knnImpute")
-testKnn <- predict(preProcKnnTest, testing[,-classeColIdx])
-
-# this part makes sense, we do prediction using the PCA from the training phase (preProcPCA)
-# testPCA <- predict(preProcPCA, testKnn)
 testPCA <- predict(preProcPCA, testing[,-classeColIdx])
 
 # out of sample error rate
 confusionMatrix(testing$classe, predict(modelFit,testPCA))
-
-# confusionMatrix(testing$classe, predict(modelFit,testing))
 
 # now lets predict the quiz set
 # fixup the quiz data
@@ -205,8 +190,3 @@ answers <- predict(modelFit,quizPCA)
 answers
 
 pml_write_files(answers)
-
-
-# modelFit <- train(training$classe ~ ., method="rf", data=trainPCA)
-
-
